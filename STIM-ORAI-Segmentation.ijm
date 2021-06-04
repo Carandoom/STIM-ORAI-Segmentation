@@ -1,8 +1,15 @@
 /*
 ImageJ/Fiji Script to do a segmentation of TIRF images
-upon puncta formation, the image will 
+upon puncta formation of STIM or ORAI
+You need to have 1 image open containing 1 channel and 1 z plane
+The image can contain timepoints
 
 Folder format:
+Main folder:
+	1_Images
+	2_ROIs
+	| 1_MCS
+	3_Analysis
 
 */
 
@@ -14,7 +21,7 @@ SaveName = replace(ImageName, Extention, "");
 run("Set Measurements...", "area mean redirect=None decimal=2");
 run("Input/Output...", "jpeg=85 gif=-1 file=.csv use_file save_column save_row");
 dir1 = getDirectory("Choose Main Directory");
-dir1_2 = dir1 + "2_ROIs\\2_MCS\\";
+dir1_2 = dir1 + "2_ROIs\\1_MCS\\";
 dir1_3 = dir1 + "3_Analysis\\";
 DeleteRoi();
 MoreCells = "Yes";
@@ -22,7 +29,13 @@ CellId = 1;
 
 while (MoreCells == "Yes") {
 	selectWindow(ImageName);
-	run("Duplicate...", "title=Temp");
+	run("Duplicate...", "title=Temp duplicate");
+	selectWindow(ImageName);
+	
+	// Select cell on which to perform the segmentation
+	DeleteRoi();
+	CreateCellRoi();
+	
 	// Find Maxima map from Image
 	NoNextMaxima = "No";
 	while (!(NoNextMaxima == "Yes")) {
@@ -37,7 +50,7 @@ while (MoreCells == "Yes") {
 		NoNextMaxima = KeepMaximaMap(MaximaNoise);
 		close(MaximaMapName);
 	}
-	selectWindow(ImageName)
+	selectWindow(ImageName);
 	SliceNb = nSlices;
 	for (i=1; i<SliceNb+1; i++) {
 		selectWindow(ImageName);
@@ -53,7 +66,7 @@ while (MoreCells == "Yes") {
 	run("Threshold...");
 	setAutoThreshold("Default dark");
 	waitForUser("Threshold", "Set the threshold then press ok");
-	run("Create Mask");
+	run("Convert to Mask", "method=Default background=Dark black");
 	rename("Mask");
 
 	// Combine the mask and the maxima map
@@ -146,12 +159,34 @@ function DeleteRoi() {
 	}
 }
 
+function CreateCellRoi() {
+	for (i=0; i<10; i++) {
+		waitForUser("Roi around cell", "Create a ROI around the cell to analyze then press ok");
+		RoiNb = roiManager("count");
+		if (RoiNb == 0) {
+			print("You need to create a ROI to define the cell of interest");
+			selectWindow("Log");
+		} else if (RoiNb > 1) {
+			print("You need to keep only one ROI to define the cell of interest");
+			selectWindow("Log");
+		}
+		if (RoiNb == 1) {
+			roiManager("select", 0);
+			run("Clear Outside", "stack");
+			run("Select None");
+			roiManager("Deselect");
+			roiManager("Delete");
+			break
+		}
+	}
+}
+
 function CustomMaximaMap() {
 	Dialog.create("Custom - Maxima map");
 	Dialog.addNumber("Custom Maxima",0);
 	Dialog.show();
 	MaximaNoise = Dialog.getNumber();
-	return MaximaNoise
+	return MaximaNoise;
 }
 
 function KeepMaximaMap(MaximaNoise) {
@@ -170,5 +205,5 @@ function AskIfMoreCells() {
 	Dialog.addRadioButtonGroup("More cells to analyze ?",newArray("Yes", "No"),2,1,"No");
 	Dialog.show();
 	MoreCells = Dialog.getRadioButton();
-	return MoreCells
+	return MoreCells;
 }
