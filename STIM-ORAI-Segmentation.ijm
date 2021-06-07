@@ -11,6 +11,8 @@ Main folder:
 	| 1_MCS
 	3_Analysis
 
+Video example on YouTube:
+https://youtu.be/QEaP-abz-Ic
 */
 
 // Define constants, set path and clear stuff before starting
