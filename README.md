@@ -5,4 +5,4 @@ The script works in ImageJ/Fiji and uses the local maxima of the fluorescence in
 
 /!\ This script is not performing tracking of the segmented structure over time.
 
-Example of the script working script: [Puncta Segmentation](https://youtu.be/QEaP-abz-Ic)
+Example video: [Puncta Segmentation](https://youtu.be/QEaP-abz-Ic)
