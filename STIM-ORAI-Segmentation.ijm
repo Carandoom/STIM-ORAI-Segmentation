@@ -6,7 +6,7 @@ The image can contain timepoints
 
 Folder format:
 Main folder:
-	1_Images
+	1_Images	// This folder is optional
 	2_ROIs
 	| 1_MCS
 	3_Analysis
